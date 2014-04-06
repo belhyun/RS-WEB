@@ -1,4 +1,6 @@
 RsWww::Application.routes.draw do
+  apipie
+  #devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -10,7 +12,11 @@ RsWww::Application.routes.draw do
 
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
-
+  namespace :api do
+    namespace :v1 do
+      post 'users/sign_up' => 'users#signup'
+    end
+  end
   # Example resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
 
