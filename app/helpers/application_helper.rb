@@ -3,6 +3,7 @@ module ApplicationHelper
     {:code => 0, :msg => msg}
   end
 
-  def success()
-    {:code => 1, :msg => 'success'}
+  def success(body)
+    {:code => 1, :body => body, :msg => 'success'}
+  end
 end
