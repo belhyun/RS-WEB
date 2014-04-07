@@ -35,6 +35,18 @@ end
 gem 'devise'
 gem 'mysql2'
 gem 'apipie-rails'
+
+group :development, :test do
+    gem 'rspec-rails', '~> 3.0.0.beta'
+end
+
+group :development, :test do
+  gem "factory_girl_rails"
+  gem "capybara"
+  gem "guard-rspec"
+end
+
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.1.2'
 
