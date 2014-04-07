@@ -6,7 +6,7 @@ module Api
       respond_to :json
       api :POST, '/users/sign_up', "가입 api"
       description "가입 API(성공 시 {code:1, msg:'success', body:{acc_token:acc_token, usn: usn, expires: timestamp}}을 반환한다.)"
-      param :user, Array, :desc => 'sign up info' , :required => true do
+      param :user, Hash, :desc => 'sign up info', :required => true do
         param :email, String, :desc => '가입 email', :required => true
         param :password, String, :desc => '가입 비밀번호', :required => true
       end
@@ -28,7 +28,7 @@ module Api
 
       private
       def sign_up_params
-        params.require(:users).permit(:email, :password).merge(encrypted_password: params[:users][:password])
+        params.require(:user).permit(:email, :password).merge(encrypted_password: params[:user][:password])
       end
     end
   end
