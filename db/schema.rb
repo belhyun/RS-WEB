@@ -11,11 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140406144630) do
+ActiveRecord::Schema.define(version: 20140409152836) do
+
+  create_table "regions", force: true do |t|
+    t.string "name"
+  end
+
+  create_table "routes", force: true do |t|
+    t.integer "region_id"
+    t.string  "name"
+  end
+
+  create_table "stations", force: true do |t|
+    t.integer "region_id"
+    t.integer "route_id"
+    t.string  "name"
+  end
 
   create_table "tokens", force: true do |t|
     t.string   "token"
-    t.integer  "usn"
+    t.integer  "user_id"
     t.datetime "expires"
   end
 

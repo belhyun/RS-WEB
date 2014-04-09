@@ -48,7 +48,7 @@ module Api
           render :json => fail(e.message)
         end
       end
-
+      
       private
       def sign_up_params
         params.require(:user).permit(:email, :password).merge(encrypted_password: params[:user][:password])

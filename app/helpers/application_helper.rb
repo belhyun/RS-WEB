@@ -4,6 +4,10 @@ module ApplicationHelper
   end
 
   def success(body)
-    {:code => 1, :body => body, :msg => 'success'}
+    if body.nil?
+      {:code => 1, :msg => 'success'}
+    else
+      {:code => 1, :body => body, :msg => 'success'}
+    end
   end
 end

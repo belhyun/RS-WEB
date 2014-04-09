@@ -16,6 +16,8 @@ RsWww::Application.routes.draw do
     namespace :v1 do
       post 'users/sign_up' => 'users#signup'
       post 'users/sign_in' => 'users#signin'
+      post 'tokens/valid' => 'tokens#valid'
+      get 'subways/:id/list' => 'subways#list'
     end
   end
   # Example resource route (maps HTTP verbs to controller actions automatically):
