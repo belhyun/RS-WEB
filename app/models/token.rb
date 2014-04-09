@@ -1,6 +1,7 @@
 class Token < ActiveRecord::Base
-  belongs_to :user
+  belongs_to :user, touch: true
   before_create :gen_token
+  before_update :gen_token
 
   def gen_token
     self.token = loop do
