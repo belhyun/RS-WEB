@@ -9,8 +9,8 @@ module Api
       param :id, String, :desc => '지역 아이디', :required => true
       formats ['json']
       def list
-        @region = Region.first
-        render :json =>@region.to_json(:include => :routes)
+        @region = Region.find(:first, :conditions => ["id = ?", list_params[:id]])
+        render :json => success(@region.as_json(:include => {:routes => {:include => :stations}}))
       end
 
       private

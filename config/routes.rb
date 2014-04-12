@@ -18,6 +18,7 @@ RsWww::Application.routes.draw do
       post 'users/sign_in' => 'users#signin'
       post 'tokens/valid' => 'tokens#valid'
       get 'subways/:id/list' => 'subways#list'
+      resources :boards
     end
   end
   # Example resource route (maps HTTP verbs to controller actions automatically):
