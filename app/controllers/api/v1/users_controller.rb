@@ -48,13 +48,36 @@ module Api
           render :json => fail(e.message)
         end
       end
+
+      api :POST, '/users/email', "이메일 검증 api"
+      description "이메일 검증 api, uniqueness를 검사한다."
+      param :email, String, :desc => '검증 email', :required => true
+      error :code => 0, :desc => '에러시 코드'
+      formats ['json']
+      def email 
+        begin
+          @user = User.find(:first, :conditions => ["email = ?", email_params[:email]], :include => [:token])
+          if !@user.blank?
+            raise 'user login required(token not exists)' if @user.token.blank?
+            render :json => success({:acc_token => @user.token || nil,
+                                       :usn => @user.id, :expires => @user.token.nil? ? nil :  @user.token.expires.to_time.to_i})
+          else
+            raise ActiveRecord::RecordNotFound, 'not exists email'
+          end
+        rescue Exception => e
+          render :json => fail(e.message)
+        end
+      end
       
       private
       def sign_up_params
-        params.require(:user).permit(:email, :password).merge(encrypted_password: params[:user][:password])
+        params.require(:user).permit(:email, :password, :route).merge(encrypted_password: params[:user][:password])
       end
       def sign_in_params
         params.require(:user).permit(:email, :password).merge(encrypted_password: params[:user][:password])
+      end
+      def email_params
+        params.permit(:email)
       end
     end
   end
