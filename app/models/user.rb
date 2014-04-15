@@ -9,18 +9,19 @@ class User < ActiveRecord::Base
   validates_uniqueness_of :email, :on => :save
   has_one :token, :autosave => true, :dependent => :destroy
   attr_accessor :password
+  scope :getUserWithToken, lambda{|k,v| find(:first, :conditions => ["#{k} = ?", v], :include => [:token])}
 
   def encrypted_password=(password) 
     write_attribute(:encrypted_password, Digest::SHA1::hexdigest(password))
   end
 
   def signIn
-    if (user = User.find(:first, :conditions => ["email = ?", email])) 
+    if (user = User.getUserWithToken(:email, email)) 
 .blank? 
       raise ActiveRecord::RecordNotFound , 'user not found' 
     else
       if User.update_counters user.id, :sign_in_count => 1
-        user.build_token.update_attributes({:token => nil})
+        user.build_token.update_attributes(Token.new.gen_token)
         user
       end
     end
