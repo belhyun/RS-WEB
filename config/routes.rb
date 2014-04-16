@@ -21,6 +21,8 @@ RsWww::Application.routes.draw do
       post 'tokens/valid' => 'tokens#valid'
       get 'subways/:id/list' => 'subways#list'
       get 'versions' => 'versions#index'
+      get 'regions/list' => 'regions#list'
+      get 'regions/routes' => 'regions#routes'
       resources :boards
     end
   end

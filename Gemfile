@@ -46,6 +46,8 @@ group :development, :test do
   gem "guard-rspec"
 end
 
+gem 'carrierwave'
+
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.1.2'

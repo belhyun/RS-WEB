@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140411140729) do
+ActiveRecord::Schema.define(version: 20140416082703) do
 
   create_table "boards", force: true do |t|
     t.integer  "region_id"
@@ -23,6 +23,12 @@ ActiveRecord::Schema.define(version: 20140411140729) do
     t.text     "contents"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "friend_public", limit: 1
+  end
+
+  create_table "files", force: true do |t|
+    t.integer "board_id"
+    t.text    "path"
   end
 
   create_table "regions", force: true do |t|
@@ -32,7 +38,7 @@ ActiveRecord::Schema.define(version: 20140411140729) do
   create_table "routes", force: true do |t|
     t.integer "region_id"
     t.string  "name"
-    t.integer "board_count"
+    t.integer "boards_count", default: 0
   end
 
   create_table "stations", force: true do |t|
