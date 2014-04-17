@@ -47,6 +47,7 @@ group :development, :test do
 end
 
 gem 'carrierwave'
+gem 'rmagick'
 
 
 # Use ActiveModel has_secure_password

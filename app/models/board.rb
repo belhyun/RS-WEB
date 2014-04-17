@@ -3,5 +3,6 @@ class Board < ActiveRecord::Base
   belongs_to :region
   belongs_to :station
   has_many :files, :dependent => :destroy
-  mount_uploader :file, FileUploader
+  mount_uploader :files, FileUploader
+  #accepts_nested_attributes_for :files
 end
