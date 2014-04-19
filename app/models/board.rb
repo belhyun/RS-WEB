@@ -2,7 +2,6 @@ class Board < ActiveRecord::Base
   belongs_to :route, :counter_cache => true
   belongs_to :region
   belongs_to :station
-  has_many :files, :dependent => :destroy
-  mount_uploader :files, FileUploader
-  #accepts_nested_attributes_for :files
+  has_many :attachments, :dependent => :destroy
+  accepts_nested_attributes_for :attachments
 end
