@@ -23,6 +23,7 @@ RsWww::Application.routes.draw do
       get 'versions' => 'versions#index'
       get 'regions/list' => 'regions#list'
       get 'regions/routes' => 'regions#routes'
+      get 'routes/:id/boards' => 'routes#boards'
       resources :boards
     end
   end

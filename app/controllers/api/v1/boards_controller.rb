@@ -15,12 +15,17 @@ module Api
       param :attachments, Array, :desc => 'attachments[]에 첨부파일을 첨부하여 보낸다.'
       formats ['json']
       def create
-        board = Board.new(create_params)
-        params[:attachments].each{|attachment|
-          board.attachments << Attachment.get_with_slice_attachment(attachment)
-        }
-        board.save!
-        render :json => board
+        begin
+          board = Board.new(create_params)
+          params[:attachments].each{|attachment|
+            board.attachments << Attachment.get_with_slice_attachment(attachment)
+          }
+          if board.save!
+            render :json => success(board.as_json(:include => :attachments))
+          end
+        rescue Exception => e
+          render :json => fail(em.message)
+        end
       end
 
       private

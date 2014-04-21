@@ -10,6 +10,7 @@ class User < ActiveRecord::Base
   has_one :token, :autosave => true, :dependent => :destroy
   attr_accessor :password
   scope :getUserWithToken, lambda{|k,v| find(:first, :conditions => ["#{k} = ?", v], :include => [:token])}
+  has_many :boards
 
   def encrypted_password=(password) 
     write_attribute(:encrypted_password, Digest::SHA1::hexdigest(password))
