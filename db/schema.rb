@@ -11,7 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140417103209) do
+ActiveRecord::Schema.define(version: 20140421154905) do
+
+  create_table "articles", id: false, force: true do |t|
+    t.text "title"
+    t.text "description"
+  end
+
+  create_table "attachments", force: true do |t|
+    t.integer "board_id"
+    t.text    "file"
+  end
+
+  create_table "board_empathies", force: true do |t|
+    t.integer "board_id"
+    t.integer "user_id"
+  end
 
   create_table "boards", force: true do |t|
     t.integer  "region_id"
@@ -23,12 +38,17 @@ ActiveRecord::Schema.define(version: 20140417103209) do
     t.text     "contents"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "friend_public", limit: 1
+    t.integer  "friend_public",  limit: 1
+    t.integer  "comments_count"
   end
 
-  create_table "files", force: true do |t|
-    t.integer "board_id"
-    t.text    "file"
+  create_table "comments", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "board_id"
+    t.integer  "user_id"
+    t.string   "title",      limit: 30
+    t.text     "contents"
   end
 
   create_table "regions", force: true do |t|
@@ -54,18 +74,19 @@ ActiveRecord::Schema.define(version: 20140417103209) do
   end
 
   create_table "users", force: true do |t|
-    t.string   "email",                  default: "", null: false
-    t.string   "encrypted_password",     default: "", null: false
+    t.string   "email",                             default: "", null: false
+    t.string   "encrypted_password",                default: "", null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          default: 0,  null: false
+    t.integer  "sign_in_count",                     default: 0,  null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "img_url",                limit: 30
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

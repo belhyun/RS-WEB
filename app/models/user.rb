@@ -10,7 +10,7 @@ class User < ActiveRecord::Base
   has_one :token, :autosave => true, :dependent => :destroy
   attr_accessor :password
   scope :getUserWithToken, lambda{|k,v| find(:first, :conditions => ["#{k} = ?", v], :include => [:token])}
-  has_many :boards
+  has_many :boards, :dependent => :destroy
 
   def encrypted_password=(password) 
     write_attribute(:encrypted_password, Digest::SHA1::hexdigest(password))
@@ -26,5 +26,9 @@ class User < ActiveRecord::Base
         user
       end
     end
+  end
+
+  def self.is_valid_user(user_id)
+    User.find_by_id(user_id).token.expires > DateTime.now
   end
 end

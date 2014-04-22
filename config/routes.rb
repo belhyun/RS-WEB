@@ -24,7 +24,13 @@ RsWww::Application.routes.draw do
       get 'regions/list' => 'regions#list'
       get 'regions/routes' => 'regions#routes'
       get 'routes/:id/boards' => 'routes#boards'
-      resources :boards
+      resources :boards do
+        member do
+          get 'comments'
+        end
+        post 'empathy' => 'boards#empathy'
+      end
+      resources :comments
     end
   end
   # Example resource route (maps HTTP verbs to controller actions automatically):
