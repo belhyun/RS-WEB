@@ -11,6 +11,8 @@ class User < ActiveRecord::Base
   attr_accessor :password
   scope :getUserWithToken, lambda{|k,v| find(:first, :conditions => ["#{k} = ?", v], :include => [:token])}
   has_many :boards, :dependent => :destroy
+  has_many :routes, :through => :user_routes, :source => :route
+  has_many :user_routes
 
   def encrypted_password=(password) 
     write_attribute(:encrypted_password, Digest::SHA1::hexdigest(password))

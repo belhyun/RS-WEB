@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140421154905) do
+ActiveRecord::Schema.define(version: 20140422152508) do
 
   create_table "articles", id: false, force: true do |t|
     t.text "title"
@@ -24,8 +24,8 @@ ActiveRecord::Schema.define(version: 20140421154905) do
   end
 
   create_table "board_empathies", force: true do |t|
-    t.integer "board_id"
-    t.integer "user_id"
+    t.integer "board_id", null: false
+    t.integer "user_id",  null: false
   end
 
   create_table "boards", force: true do |t|
@@ -72,6 +72,16 @@ ActiveRecord::Schema.define(version: 20140421154905) do
     t.integer  "user_id"
     t.datetime "expires"
   end
+
+  create_table "user_routes", force: true do |t|
+    t.integer "user_id"
+    t.integer "route_id"
+    t.integer "region_id"
+  end
+
+  add_index "user_routes", ["region_id"], name: "index_user_routes_on_region_id", using: :btree
+  add_index "user_routes", ["route_id"], name: "index_user_routes_on_route_id", using: :btree
+  add_index "user_routes", ["user_id"], name: "index_user_routes_on_user_id", using: :btree
 
   create_table "users", force: true do |t|
     t.string   "email",                             default: "", null: false

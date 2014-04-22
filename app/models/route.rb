@@ -2,6 +2,7 @@ class Route < ActiveRecord::Base
   belongs_to :region
   has_many :stations, :dependent => :destroy
   has_many :boards
+  has_many :user_routes
   self.per_page = 10
 
   def self.get_boards(id, page)

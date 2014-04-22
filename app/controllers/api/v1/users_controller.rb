@@ -90,6 +90,20 @@ module Api
         end
       end
 
+      api :POST, '/users/:id/routes', "즐겨찾는 호선정보 추가하기"
+      description ":id는 사용자의 user_id를 나타낸다. 즐겨찾는 호선정보를 저장한다."
+      param :id, String, :desc => 'user_id', :required => true
+      param :region_id, String, :desc => '지역 id', :required => true
+      param :route_id, String, :desc => '지하철 호선 id', :required => true
+      error :code => 0, :desc => '에러시 코드'
+      formats ['json']
+      def routes
+        if userRoutes = UserRoute.find_or_create_by(routes_params)
+          render :json => success(userRoutes)
+        else
+          raise Exception, 'user routes fail'
+        end 
+      end
       
       private
       def sign_up_params
@@ -103,6 +117,9 @@ module Api
       end
       def signout_params
         params.permit(:usn)
+      end
+      def routes_params
+        params.permit(:user_id, :region_id, :route_id)
       end
     end
   end

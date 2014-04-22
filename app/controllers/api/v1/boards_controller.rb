@@ -1,7 +1,7 @@
 module Api
   module V1
     class BoardsController < ApplicationController
-      before_action :is_valid_user, only: [:empathy]
+      before_action :is_valid_user, only: [:empathy,:create]
       api :POST, '/boards', "게시글을 생성한다."
       description "게시글을 생성한다."
       param :region_id, String, :desc => '지역 아이디', :required => true

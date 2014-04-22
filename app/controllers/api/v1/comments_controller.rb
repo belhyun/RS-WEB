@@ -1,4 +1,5 @@
 class Api::V1::CommentsController < ApplicationController
+  before_action :is_valid_user, only: [:create]
   api :POST, '/comments', "댓글을 생성한다."
   description "댓글을 생성한다."
   param :board_id, String, :desc => '글 아이디', :required => true

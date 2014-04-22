@@ -18,6 +18,7 @@ RsWww::Application.routes.draw do
       post 'users/sign_in' => 'users#signin'
       post 'users/sign_out' => 'users#signout'
       post 'users/email' => 'users#email'
+      post 'users/:user_id/routes' => 'users#routes'
       post 'tokens/valid' => 'tokens#valid'
       get 'subways/:id/list' => 'subways#list'
       get 'versions' => 'versions#index'
