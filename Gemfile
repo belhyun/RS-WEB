@@ -48,6 +48,7 @@ end
 
 gem 'carrierwave'
 gem 'will_paginate', '~> 3.0'
+gem 'mini_magick'
 #gem 'protected_attributes'
 
 

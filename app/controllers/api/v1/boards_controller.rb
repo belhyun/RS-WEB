@@ -32,7 +32,15 @@ module Api
       param :id, String, :desc => 'board_id'
       formats ['json']
       def comments
-        render :json => Board.get(comments_params[:id]).comments
+        render :json => success(Board.get(comments_params[:id]).comments)
+      end
+
+      api :GET, '/boards/:id', "게시글을 반환한다."
+      description "게시글을 반환한다."
+      param :id, String, :desc => 'board_id'
+      formats ['json']
+      def show
+        render :json => success(Board.find_by_id(show_params[:id]).as_json(:include => [:attachments, :comments]))
       end
 
       api :GET, '/boards/:id/empathy', "글에 대한 공감을 한다."
@@ -60,6 +68,10 @@ module Api
 
       def empathy_params
         params.permit(:board_id,:user_id)
+      end
+
+      def show_params
+        params.permit(:id)
       end
     end
   end

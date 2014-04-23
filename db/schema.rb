@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140422152508) do
+ActiveRecord::Schema.define(version: 20140423051039) do
 
   create_table "articles", id: false, force: true do |t|
     t.text "title"
@@ -73,6 +73,13 @@ ActiveRecord::Schema.define(version: 20140422152508) do
     t.datetime "expires"
   end
 
+  create_table "user_followers", force: true do |t|
+    t.integer "user_id"
+    t.integer "follow_id"
+  end
+
+  add_index "user_followers", ["user_id"], name: "index_user_followers_on_user_id", using: :btree
+
   create_table "user_routes", force: true do |t|
     t.integer "user_id"
     t.integer "route_id"
@@ -96,7 +103,7 @@ ActiveRecord::Schema.define(version: 20140422152508) do
     t.string   "last_sign_in_ip"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "img_url",                limit: 30
+    t.string   "image",                  limit: 30
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
