@@ -6,12 +6,11 @@ class User < ActiveRecord::Base
   #include ActiveModel::ForbiddenAttributesProtection
   validates :email, format: { with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i}
   validates_uniqueness_of :email, :on => :save
-  validates_presence_of :email, :password, :nick, :on => :create
+  validates_presence_of :email, :password, :nick, :on => :save
   has_one :token, :autosave => true, :dependent => :destroy
   attr_accessor :password
   scope :getUserWithToken, lambda{|k,v| find(:first, :conditions => ["#{k} = ?", v], :include => [:token])}
-  scope :followers, lambda{|v| joins("INNER JOIN follows ON users.id = follows.follow_id")
-                           .where("follows.follow_id = ?", v)}
+  scope :followers, lambda{|v| where(id: Follow.select(:user_id).where(follow_id: v))}
   has_many :boards, :dependent => :destroy
   has_many :routes, :through => :user_routes, :source => :route
   has_many :user_routes, :source => :user

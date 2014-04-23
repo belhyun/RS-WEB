@@ -1,10 +1,10 @@
 module Api
   module V1
     class UsersController <  ApplicationController
-      before_action :is_valid_user, only: [:routes,:create,:follow,:nick,:profile]
+      before_action :is_valid_user, only: [:routes,:create,:follow,:nick,:profile,:signout]
       respond_to :json
       api :POST, '/users/sign_up', "가입 api"
-      description "가입 API(성공 시 {code:1, msg:'success', body:{acc_token:acc_token, usn: usn, expires: datetime}}을 반환한다.)"
+      description "가입 API"
       param :user, Hash, :desc => 'sign up info', :required => true do
         param :email, String, :desc => '가입 email', :required => true
         param :password, String, :desc => '가입 비밀번호', :required => true
@@ -19,7 +19,7 @@ module Api
             render :json => fail(@user.errors)
           else
             render :json => success({:acc_token => @user.token.token,
-            :usn => @user.id, :expires => @user.token.expires.to_time}) if @user.build_token && @user.save
+            :usn => @user.id, :expires => @user.token.expires}) if @user.build_token && @user.save
           end
         rescue Exception => e
           render :json => fail(e.message)
@@ -27,7 +27,7 @@ module Api
       end
 
       api :POST, '/users/sign_in', "로그인 api"
-      description "로그인 API, 토큰과 만료시간을 갱신하고 로그인 횟수를 재 갱신한다.(성공 시 {code:1, msg:'success', body:{acc_token:acc_token, usn: usn, expires: datetime}}을 반환한다.)"
+      description "로그인 API, 토큰과 만료시간을 갱신하고 로그인 횟수를 재 갱신한다."
       param :user, Hash, :desc => 'sign in info', :required => true do
         param :email, String, :desc => '로그인 email', :required => true
         param :password, String, :desc => '로그인 비밀번호', :required => true
@@ -43,7 +43,7 @@ module Api
             @user = @user.signIn
             #render :json => success({:acc_token => @user.token.token,
             #:usn => @user.id, :expires => @user.token.expires.to_time})
-            render :json => success(@user.token)
+            render :json => success(@user.token.as_json(except: [:id]))
           end
         rescue Exception => e
           render :json => fail(e.message)
@@ -72,15 +72,15 @@ module Api
 
       api :POST, '/users/sign_out', "로그아웃 api"
       description "로그아웃 api."
-      param :usn, String, :desc => 'user serial number(user id)', :required => true
+      param :user_id, String, :desc => 'user_id', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def signout 
         begin
-          @user = User.getUserWithToken(:id, signout_params[:usn])
+          @user = User.getUserWithToken(:id, signout_params[:user_id])
           if !@user.blank?
             raise 'user login required(token not exists)' if @user.token.blank?
-            User.find_by_id(signout_params[:usn], :include => [:token]).token.update_attributes(:expires => DateTime::now - 999.days)
+            User.find_by_id(signout_params[:user_id], :include => [:token]).token.update_attributes(:expires => DateTime::now - 999.days)
             render :json => success({:acc_token => @user.token.token || nil,
                                        :usn => @user.id, :expires => @user.token.nil? ? nil :  @user.token.expires.to_time})
           else
@@ -100,9 +100,9 @@ module Api
         render :json => success(User.find_by_id(params[:id]))
       end
 
-      api :POST, '/users/:id/routes', "즐겨찾는 호선정보 추가하기"
-      description ":id는 사용자의 user_id를 나타낸다. 즐겨찾는 호선정보를 저장한다."
-      param :id, String, :desc => 'user_id', :required => true
+      api :POST, '/users/:user_id/routes', "즐겨찾는 호선정보 추가하기"
+      description "즐겨찾는 호선정보를 저장한다.(나의 즐겨찾는 호선)"
+      param :user_id, String, :desc => 'user_id', :required => true
       param :region_id, String, :desc => '지역 id', :required => true
       param :route_id, String, :desc => '지하철 호선 id', :required => true
       error :code => 0, :desc => '에러시 코드'
@@ -115,18 +115,18 @@ module Api
         end 
       end
 
-      api :GET, '/users/:id/routes', "즐겨찾기 한 호선 정보를 가져온다."
-      description ":id는 사용자의 user_id를 나타낸다."
-      param :id, String, :desc => 'user_id', :required => true
+      api :GET, '/users/:user_id/routes', "즐겨찾기 한 호선 정보를 가져온다."
+      description "즐겨찾기 한 호선 정보를 가져온다."
+      param :user_id, String, :desc => 'user_id', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def get_routes
         render :json => success(User.find_by_id(get_routes_param[:user_id]).routes)
       end
 
-      api :POST, '/users/:id/profile', "유저의 프로필 이미지를 업데이트 한다."
-      description ":id는 사용자의 user_id를 나타낸다."
-      param :image, File, :desc => '이미지', :required => true
+      api :POST, '/users/:user_id/profile', "유저의 프로필 이미지를 업데이트 한다."
+      description "유저의 프로필 이미지 업로드하기"
+      param :image, ActionDispatch::Http::UploadedFile, :desc => '이미지', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def profile
@@ -143,6 +143,9 @@ module Api
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def follow
+        if follow_params[:user_id] === follow_params[:follow_id]
+          raise 'same user'
+        end
         @follow = Follow.find_or_create_by(follow_params)
         render :json => success(@follow)
       end
@@ -195,6 +198,9 @@ module Api
       def follow_params
         params.permit(:user_id, :follow_id)
       end
+      def follows_params
+        params.permit(:user_id)
+      end
       def sign_up_params
         params.require(:user).permit(:email, :password, :route, :nick).merge(encrypted_password: params[:user][:password])
       end
@@ -205,7 +211,7 @@ module Api
         params.permit(:email)
       end
       def signout_params
-        params.permit(:usn)
+        params.permit(:user_id)
       end
       def routes_params
         params.permit(:user_id, :region_id, :route_id)

@@ -4,11 +4,11 @@ class Token < ActiveRecord::Base
   #before_update :gen_token
 
   def gen_token
-    token = loop do
+    self.token = loop do
       random_token = SecureRandom.urlsafe_base64(nil, false)
       break random_token unless Token.exists?(token: random_token)
     end
-    expires = Time.now + 60.days
+    self.expires = Time.now + 60.days
     {token: token, expires: expires}
   end
 end

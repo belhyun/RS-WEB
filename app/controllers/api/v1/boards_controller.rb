@@ -40,7 +40,7 @@ module Api
       param :id, String, :desc => 'board_id'
       formats ['json']
       def show
-        render :json => success(Board.find_by_id(show_params[:id]).as_json(:include => [:attachments, :comments]))
+        render :json => success(Board.find_by_id(show_params[:id]).as_json(:include => [:attachments, :comments, :board_empathies]))
       end
 
       api :GET, '/boards/:id/empathy', "글에 대한 공감을 한다."
