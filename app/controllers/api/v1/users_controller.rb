@@ -1,13 +1,14 @@
 module Api
   module V1
     class UsersController <  ApplicationController
-      skip_before_filter :verify_authenticity_token
+      before_action :is_valid_user, only: [:routes,:create,:follow,:nick,:profile]
       respond_to :json
       api :POST, '/users/sign_up', "가입 api"
       description "가입 API(성공 시 {code:1, msg:'success', body:{acc_token:acc_token, usn: usn, expires: datetime}}을 반환한다.)"
       param :user, Hash, :desc => 'sign up info', :required => true do
         param :email, String, :desc => '가입 email', :required => true
         param :password, String, :desc => '가입 비밀번호', :required => true
+        param :nick, String, :desc => '닉네임', :required => true
       end
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
@@ -135,39 +136,67 @@ module Api
         render :json => success(@user)
       end
 
-      api :POST, '/users/:id/follow', "팔로잉 한다."
+      api :POST, '/users/:user_id/follow', "팔로잉 한다."
       description ":id는 사용자의 user_id를 나타낸다."
-      param :id, String, :desc => '팔로잉할 사람 아이디', :required => true
+      param :user_id, String, :desc => '팔로잉할 사람 아이디', :required => true
       param :follow_id, String, :desc => '팔로잉하는 사람 아이디', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def follow
-        @follow = Follow.create(follow_params)
+        @follow = Follow.find_or_create_by(follow_params)
         render :json => success(@follow)
       end
 
-      api :GET, '/users/:id/follows', "팔로잉 리스트를 반환한다."
+      api :GET, '/users/:user_id/follows', "팔로잉 리스트를 반환한다."
       description ":id는 사용자의 user_id를 나타낸다."
-      param :id, String, :desc => '유저 아이디', :required => true
+      param :user_id, String, :desc => '유저 아이디', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def follows
         unless (@user = User.find_by_id(follows_params[:user_id])).blank?
           render :json => success(@user.follows)
         else
-          render :json => fail('follows not exists')
+          render :json => success({})
+        end
+      end
+
+      api :GET, '/users/:user_id/followers', "팔로워 리스트를 반환한다."
+      description ":id는 사용자의 user_id를 나타낸다."
+      param :user_id, String, :desc => '유저 아이디', :required => true
+      error :code => 0, :desc => '에러시 코드'
+      formats ['json']
+      def followers
+        unless (followers = User.followers(followers_params[:user_id])).blank?
+          render :json => success(followers.as_json)
+        else
+          render :json => success({})
+        end
+      end
+
+      api :POST, '/users/:user_id/nick', "닉네임을 변경한다."
+      description ":id는 사용자의 user_id를 나타낸다."
+      param :user_id, String, :desc => '유저 아이디', :required => true
+      param :nick, String, :desc => '변경 닉네임, url encode 하여 보낸다.', :required => true
+      error :code => 0, :desc => '에러시 코드'
+      formats ['json']
+      def change_nick
+        if User.update(change_nick_params[:user_id], nick: URI.unescape(change_nick_params[:nick])) 
+          render :json => success(nil)
         end
       end
       
       private
-      def follows_params
+      def change_nick_params
+        params.permit(:user_id, :nick)
+      end
+      def followers_params
         params.permit(:user_id)
       end
       def follow_params
         params.permit(:user_id, :follow_id)
       end
       def sign_up_params
-        params.require(:user).permit(:email, :password, :route).merge(encrypted_password: params[:user][:password])
+        params.require(:user).permit(:email, :password, :route, :nick).merge(encrypted_password: params[:user][:password])
       end
       def sign_in_params
         params.require(:user).permit(:email, :password).merge(encrypted_password: params[:user][:password])

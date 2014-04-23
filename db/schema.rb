@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140423051039) do
+ActiveRecord::Schema.define(version: 20140423122305) do
 
   create_table "articles", id: false, force: true do |t|
     t.text "title"
@@ -51,6 +51,13 @@ ActiveRecord::Schema.define(version: 20140423051039) do
     t.text     "contents"
   end
 
+  create_table "follows", force: true do |t|
+    t.integer "user_id"
+    t.integer "follow_id"
+  end
+
+  add_index "follows", ["user_id"], name: "index_user_followers_on_user_id", using: :btree
+
   create_table "regions", force: true do |t|
     t.string "name"
   end
@@ -72,13 +79,6 @@ ActiveRecord::Schema.define(version: 20140423051039) do
     t.integer  "user_id"
     t.datetime "expires"
   end
-
-  create_table "user_followers", force: true do |t|
-    t.integer "user_id"
-    t.integer "follow_id"
-  end
-
-  add_index "user_followers", ["user_id"], name: "index_user_followers_on_user_id", using: :btree
 
   create_table "user_routes", force: true do |t|
     t.integer "user_id"
@@ -104,6 +104,8 @@ ActiveRecord::Schema.define(version: 20140423051039) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "image",                  limit: 30
+    t.integer  "follows_count"
+    t.string   "nick"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

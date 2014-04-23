@@ -24,6 +24,8 @@ RsWww::Application.routes.draw do
       post 'users/:user_id/profile' => 'users#profile'
       post 'users/:user_id/follow' => 'users#follow'
       get 'users/:user_id/follows' => 'users#follows'
+      get 'users/:user_id/followers' => 'users#followers'
+      post 'users/:user_id/nick' => 'users#change_nick'
       post 'tokens/valid' => 'tokens#valid'
       get 'subways/:id/list' => 'subways#list'
       get 'versions' => 'versions#index'
