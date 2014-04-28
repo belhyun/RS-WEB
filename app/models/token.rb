@@ -11,4 +11,8 @@ class Token < ActiveRecord::Base
     self.expires = Time.now + 60.days
     {token: token, expires: expires}
   end
+
+  def self.is_valid(token)
+    Token.where(["token = ? AND expires >= ?",token, DateTime.now])
+  end
 end

@@ -15,6 +15,7 @@ class User < ActiveRecord::Base
   has_many :routes, :through => :user_routes, :source => :route
   has_many :user_routes, :source => :user
   has_many :follows, :dependent => :destroy
+  has_many :comments
   mount_uploader :image, ProfileUploader
 
   def encrypted_password=(password) 

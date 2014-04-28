@@ -6,7 +6,7 @@ module Api
       respond_to :json
       api :POST, '/tokens/valid', "토큰 검증 api"
       description "토큰 검증 API(성공 시 {code:1, msg:'success'}을 반환한다.)"
-      param :acc_token, String, :desc => '액세스 토큰', :required => true
+      param :acc_token, String, :desc => '액세스 토큰', :required => true, :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def valid

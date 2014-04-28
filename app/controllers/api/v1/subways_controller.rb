@@ -10,7 +10,7 @@ module Api
       formats ['json']
       def list
         @region = Region.find(:first, :conditions => ["id = ?", list_params[:id]])
-        render :json => success(@region.as_json(:include => {:routes => {:include => :stations}}))
+        render :json => success(@region.as_json(:include => {:routes => {:include => {:stations => {:except => [:region_id]}}}}))
       end
 
       private

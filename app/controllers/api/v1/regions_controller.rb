@@ -14,6 +14,6 @@ class Api::V1::RegionsController < ApplicationController
   error :code => 0, :desc => '에러시 코드'
   formats ['json']
   def routes
-    render :json => success(Region.find(:all, :include => [:routes]).as_json(:include => :routes))
+    render :json => success(Region.all.as_json(:include => {:routes => {:except => [:region_id]}}))
   end
 end

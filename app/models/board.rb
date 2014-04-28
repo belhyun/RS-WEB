@@ -8,4 +8,9 @@ class Board < ActiveRecord::Base
   has_many :board_empathies, :dependent => :destroy
   accepts_nested_attributes_for :attachments
   scope :get, lambda {|id| where(:id => id).first}
+
+  def as_json(options)
+    options[:except] = [:created_at]
+    super(options)
+  end
 end

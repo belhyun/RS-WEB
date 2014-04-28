@@ -1,7 +1,7 @@
 module Api
   module V1
     class UsersController <  ApplicationController
-      before_action :is_valid_user, only: [:routes,:create,:follow,:nick,:profile,:signout]
+      before_action :is_valid_token, only: [:routes,:create,:follow,:change_nick,:profile,:signout,:show,:get_routes,:follows,:followers]
       respond_to :json
       api :POST, '/users/sign_up', "가입 api"
       description "가입 API"
@@ -56,44 +56,53 @@ module Api
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def email 
-        begin
-          @user = User.getUserWithToken(:email, email_params[:email])
-          if !@user.blank?
-            raise 'user login required(token not exists)' if @user.token.blank?
-            render :json => success({:acc_token => @user.token.token || nil,
-                                       :usn => @user.id, :expires => @user.token.nil? ? nil :  @user.token.expires.to_time})
-          else
-            raise ActiveRecord::RecordNotFound, 'not exists email'
-          end
-        rescue Exception => e
-          render :json => fail(e.message)
+        @user = User.getUserWithToken(:email, email_params[:email])
+        if !@user.blank?
+          raise 'user login required(token not exists)' if @user.token.blank?
+          #render :json => success({:acc_token => @user.token.token || nil,
+          #                           :usn => @user.id, :expires => @user.token.nil? ? nil :  @user.token.expires.to_time})
+          render :json => success(nil)
+        else
+          raise ActiveRecord::RecordNotFound, 'not exists email'
         end
       end
+
+      api :POST, '/users/nick', "닉네임 검증 api, 존재할 경우 1 존재하지 않을 경우 0 반환"
+      description "닉네임 검증 api, uniqueness를 검사한다."
+      param :nick, String, :desc => '검증 닉네임(url encode)', :required => true
+      error :code => 0, :desc => '에러시 코드'
+      formats ['json']
+      def nick 
+        @user = User.where(["nick = ?", URI::decode(params[:nick])])
+        if !@user.blank?
+          render :json => success(nil)
+        else
+          raise ActiveRecord::RecordNotFound, 'not exists nick'
+        end
+      end
+
 
       api :POST, '/users/sign_out', "로그아웃 api"
       description "로그아웃 api."
       param :user_id, String, :desc => 'user_id', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def signout 
-        begin
-          @user = User.getUserWithToken(:id, signout_params[:user_id])
-          if !@user.blank?
-            raise 'user login required(token not exists)' if @user.token.blank?
-            User.find_by_id(signout_params[:user_id], :include => [:token]).token.update_attributes(:expires => DateTime::now - 999.days)
-            render :json => success({:acc_token => @user.token.token || nil,
-                                       :usn => @user.id, :expires => @user.token.nil? ? nil :  @user.token.expires.to_time})
-          else
-            raise ActiveRecord::RecordNotFound, 'user not exists'
-          end
-        rescue Exception => e
-          render :json => fail(e.message)
+        @user = User.getUserWithToken(:id, signout_params[:user_id])
+        if !@user.blank?
+          raise 'user login required(token not exists)' if @user.token.blank?
+          User.find_by_id(signout_params[:user_id], :include => [:token]).token.update_attributes(:expires => DateTime::now - 999.days)
+          render :json => success(nil)
+        else
+          raise ActiveRecord::RecordNotFound, 'user not exists'
         end
       end
 
       api :POST, '/users/:id', "유저정보를 반환한다."
       description "유저정보를 반환한다."
       param :id, String, :desc => 'user_id', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def show
@@ -105,6 +114,7 @@ module Api
       param :user_id, String, :desc => 'user_id', :required => true
       param :region_id, String, :desc => '지역 id', :required => true
       param :route_id, String, :desc => '지하철 호선 id', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def routes
@@ -118,6 +128,7 @@ module Api
       api :GET, '/users/:user_id/routes', "즐겨찾기 한 호선 정보를 가져온다."
       description "즐겨찾기 한 호선 정보를 가져온다."
       param :user_id, String, :desc => 'user_id', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def get_routes
@@ -127,6 +138,7 @@ module Api
       api :POST, '/users/:user_id/profile', "유저의 프로필 이미지를 업데이트 한다."
       description "유저의 프로필 이미지 업로드하기"
       param :image, ActionDispatch::Http::UploadedFile, :desc => '이미지', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def profile
@@ -140,6 +152,7 @@ module Api
       description ":id는 사용자의 user_id를 나타낸다."
       param :user_id, String, :desc => '팔로잉할 사람 아이디', :required => true
       param :follow_id, String, :desc => '팔로잉하는 사람 아이디', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def follow
@@ -153,6 +166,7 @@ module Api
       api :GET, '/users/:user_id/follows', "팔로잉 리스트를 반환한다."
       description ":id는 사용자의 user_id를 나타낸다."
       param :user_id, String, :desc => '유저 아이디', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def follows
@@ -166,6 +180,7 @@ module Api
       api :GET, '/users/:user_id/followers', "팔로워 리스트를 반환한다."
       description ":id는 사용자의 user_id를 나타낸다."
       param :user_id, String, :desc => '유저 아이디', :required => true
+      param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def followers
