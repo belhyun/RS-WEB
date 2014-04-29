@@ -1,5 +1,5 @@
 class Follow < ActiveRecord::Base
-  belongs_to :users, :counter_cache => true
+  belongs_to :user, :counter_cache => true
   before_save :presence_check
   
   def presence_check

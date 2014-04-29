@@ -10,7 +10,7 @@ class Board < ActiveRecord::Base
   scope :get, lambda {|id| where(:id => id).first}
 
   def as_json(options)
-    options[:except] = [:created_at]
+    options[:except] = [:updated_at]
     super(options)
   end
 end

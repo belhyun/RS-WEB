@@ -12,7 +12,7 @@ class Route < ActiveRecord::Base
     result[:route] = route
     result[:region] = route.region
     result[:boards] = route.boards.paginate(:per_page => Route.per_page, :page => page).order(:created_at => :desc)
-    .as_json(include: [{user: {include: :token} }, :attachments, :comments, :board_empathies])
+    .as_json(include: [{user: {include: [:follows => {:include => [:user]}]} }, :attachments, :comments, :board_empathies])
     result
   end
 end
