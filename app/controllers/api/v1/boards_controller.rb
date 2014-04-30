@@ -39,7 +39,8 @@ module Api
       param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
       formats ['json']
       def show
-        render :json => success(Board.find_by_id(show_params[:id]).as_json(:include => [:attachments, :comments, :board_empathies]))
+        render :json => success(Board.find_by_id(show_params[:id]).as_json(:include => 
+        [:attachments, {:comments => {:include => :user}}, {:board_empathies => {:include => :user}}]))
       end
 
       api :GET, '/boards/:id/empathy', "글에 대한 공감을 한다."
@@ -50,7 +51,7 @@ module Api
       formats ['json']
       def empathy
         if boardEmpathy = BoardEmpathy.find_or_create_by(empathy_params)
-          render :json => success(boardEmpathy)
+          render :json => success(boardEmpathy.as_json(:include => :board))
         else
           raise Exception, 'board empathy fail'
         end 

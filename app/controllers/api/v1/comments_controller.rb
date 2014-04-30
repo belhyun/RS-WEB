@@ -7,14 +7,12 @@ class Api::V1::CommentsController < ApplicationController
   param :contents, String, :desc => '내용', :required => true
   param :user_id, String, :desc => '사용자 아이디', :required => true
   param :acc_token, String, :desc => 'acc token(액세스 토큰).', :required => true
+  param :attachment, ActionDispatch::Http::UploadedFile, :desc => '이미지'
   formats ['json']
   def create
-    begin
-      if comment = Comment.create(create_params)
-        render :json => success(comment)
-      end
-    rescue Exception => e
-      render :json => fail(e.message)
+    if comment = Comment.new(create_params)
+      comment.attachment = Attachment.new(:file => params[:attachment]) if params.has_key?(:attachment)
+      render :json => success(comment.as_json(:include => [:attachment, :user])) if comment.save!
     end
   end
 

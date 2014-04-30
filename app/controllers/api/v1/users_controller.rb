@@ -106,7 +106,12 @@ module Api
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def show
-        render :json => success(User.find_by_id(params[:id]))
+        user  = User.find_by_id(params[:id])
+        if user.nil?
+          raise 'user not found'
+        else
+          render :json => user.as_json(:include => [:follows,:boards])
+        end
       end
 
       api :POST, '/users/:user_id/routes', "즐겨찾는 호선정보 추가하기"
@@ -118,8 +123,8 @@ module Api
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def routes
-        if userRoutes = UserRoute.find_or_create_by(routes_params)
-          render :json => success(userRoutes)
+        if userRoute = UserRoute.find_or_create_by(routes_params)
+          render :json => success(userRoute.as_json(:include => [:user, :route]))
         else
           raise Exception, 'user routes fail'
         end 
@@ -160,7 +165,7 @@ module Api
           raise 'same user'
         end
         @follow = Follow.find_or_create_by(follow_params)
-        render :json => success(@follow)
+        render :json => success(@follow.as_json(:include => :user))
       end
 
       api :GET, '/users/:user_id/follows', "팔로잉 리스트를 반환한다."
@@ -171,7 +176,7 @@ module Api
       formats ['json']
       def follows
         unless (@user = User.find_by_id(follows_params[:user_id])).blank?
-          render :json => success(@user.follows)
+          render :json => success(@user.as_json(:include => :follows))
         else
           render :json => success({})
         end
@@ -198,8 +203,8 @@ module Api
       error :code => 0, :desc => '에러시 코드'
       formats ['json']
       def change_nick
-        if User.update(change_nick_params[:user_id], nick: URI.unescape(change_nick_params[:nick])) 
-          render :json => success(nil)
+        if user = User.update(change_nick_params[:user_id], nick: URI.unescape(change_nick_params[:nick])) 
+          render :json => success(user)
         end
       end
       
